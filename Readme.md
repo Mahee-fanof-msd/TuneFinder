@@ -252,6 +252,18 @@ Users are responsible for obtaining appropriate rights to any audio they process
 
 API credentials and local recordings should remain private.
 
+## Technical Documentation
+
+For detailed information about TuneFinder, refer to the following guides:
+
+| Document | Description |
+|---|---|
+| [System Architecture](docs/architecture.md) | Application components, services, and data flow |
+| [Audio Recognition](docs/audio_recognition.md) | Fingerprinting, chunking, peak matching, and recognition |
+| [Recommendation System](docs/recommendation_system.md) | Cyanite recommendations and Groq/Tavily discovery |
+| [API Documentation](docs/api_documentation.md) | FastAPI endpoints and integration details |
+| [Setup Guide](docs/setup_guide.md) | Installation, configuration, and running the application |
+
 ## Project Status
 
 Working local prototype with song recognition, online fallback, audio-based recommendations, and natural-language music discovery.
