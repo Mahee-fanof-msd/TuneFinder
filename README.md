@@ -92,22 +92,29 @@ TuneFinder separates music recognition, recommendations, and discovery into inde
      Recognition         Cyanite         Groq + Tavily
        Service           Service           Services
           |                 |                 |
-    Fingerprinting     Audio Analysis    Search and
-          |                 |            Verification
-       SQLite DB       Similar Tracks       Results
-          |
-      Match Found?
-        /      \
-       YES      NO
-        |        |
-    Local Match  AudD API
-        |        |
-        +--------+
-             |
-       Recognition Result
+   10-second Check    Audio Analysis     Tavily Web
+          |                 |              Search
+   Speed Detection    /cyanite/webhook        |
+  (0.5x – 1.5x)      (analysis ready)    Groq Verifies
+          |                 |              Results
+    Fingerprinting    Similar Tracks          |
+          |                 |          Verified Songs +
+       SQLite DB            |          Possible Matches
+          |                 |              + Sources
+      Match Found?          |                 |
+        /      \            |                 |
+       YES      NO          |                 |
+        |        |          |                 |
+   Local Match  AudD API    |                 |
+        |        |          |                 |
+        +--------+          |                 |
+             |              |                 |
+     Recognition Result     |                 |
+             |              |                 |
+             +--------------+-----------------+
+                            |
+                 📱 Results shown in Streamlit
 ```
-
-![TuneFinder Architecture](docs/images/architecture.png)
 
 📖 Read more: [System Architecture](docs/architecture.md)
 
