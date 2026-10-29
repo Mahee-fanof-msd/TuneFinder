@@ -1,9 +1,9 @@
 
 import librosa
 
-from app.services.audio_fingerprint import AudioFingerprint
-from app.services.fingerprint_db import FingerprintDB
-from app.services.fingerprint_matcher import FingerprintMatcher
+from app.fingerprinting.fingerprinter import AudioFingerprint
+from app.fingerprinting.database import FingerprintDB
+from app.fingerprinting.matcher import FingerprintMatcher
 
 
 # Minimum audio duration in seconds

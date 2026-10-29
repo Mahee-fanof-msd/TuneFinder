@@ -1,61 +1,25 @@
-
 # Python
 __pycache__/
-*.py[cod]
-*.pyo
+*.pyc
 .pytest_cache/
-.mypy_cache/
 
-# Virtual environments
+# Virtual environment
 .venv/
 venv/
-env/
 
-# Environment variables and credentials
+# Secrets
 .env
-.env.*
-!.env.example
-*.pem
-*.key
-secrets.json
 
-# Streamlit secrets
-.streamlit/secrets.toml
+# Generated data (large or personal)
+data/db/*.db
+data/recordings/*.wav
+archive/**/chroma_db/
 
-# Audio files and downloaded songs
-songs/
-*.mp3
-*.wav
-*.flac
-*.m4a
-*.ogg
-*.aac
+# Songs are copyrighted; keep them local
+data/songs/*.mp3
 
-# Local databases
-*.db
-*.sqlite
-*.sqlite3
-*.db-journal
-*.db-wal
-*.db-shm
-chroma_db/
-chroma_data/
-
-# Temporary and generated files
-tmp/
-temp/
-logs/
-*.log
-*.tmp
-
-# IDE and operating system
+# Editors / OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-# Build outputs
-build/
-dist/
-*.egg-info/
-data/cyanite_analysis.json

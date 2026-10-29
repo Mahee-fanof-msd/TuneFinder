@@ -1,9 +1,13 @@
-
 import sqlite3
+from pathlib import Path
+
+from app.config import FINGERPRINT_DB_PATH
 
 
 class FingerprintDB:
-    def __init__(self, db_path="fingerprints.db"):
+    def __init__(self, db_path=FINGERPRINT_DB_PATH):
+        db_path = Path(db_path)
+        db_path.parent.mkdir(parents=True, exist_ok=True)
         self.connection = sqlite3.connect(db_path)
         self.cursor = self.connection.cursor()
         self.create_tables()

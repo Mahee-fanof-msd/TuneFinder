@@ -1,6 +1,6 @@
 
 from app.audio.microphone import MicrophoneRecorder
-from app.services.song_recognition_service import SongRecognitionService
+from app.services.recognition_service import SongRecognitionService
 
 
 # Initialize microphone and recognition service
@@ -13,7 +13,7 @@ print("-----------------------------")
 
 # Step 1: Record music from microphone
 audio_path = recorder.record(
-    "data/test_clips/recorded_audio.wav"
+    "data/recordings/recorded_audio.wav"
 )
 
 # Step 2: Recognize recorded music

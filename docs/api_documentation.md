@@ -4,7 +4,7 @@
 
 TuneFinder uses FastAPI to expose REST endpoints for music recognition, recommendations, and discovery.
 
-The Streamlit frontend communicates with these endpoints using HTTP.
+The Streamlit frontend (`frontend/streamlit_app.py`) communicates with these endpoints using HTTP. All endpoints are defined in `app/main.py`.
 
 ## Base URL
 
@@ -12,6 +12,16 @@ For local development:
 
 ```text
 http://127.0.0.1:8000
+```
+
+The frontend reads this address from `API_URL` in the `.env` file.
+
+## Starting the Backend
+
+From the project root, with the virtual environment activated:
+
+```powershell
+python -m uvicorn app.main:app --reload
 ```
 
 ## Interactive API Documentation
@@ -28,13 +38,24 @@ Open this URL while the backend is running to inspect the exact request and resp
 
 | Method | Endpoint | Purpose |
 |---|---|---|
+| GET | `/` | Basic API information |
+| GET | `/health` | Check that the backend is running |
 | POST | `/recognize` | Recognize recorded audio |
 | POST | `/recommend` | Submit audio for Cyanite analysis |
-| GET | `/recommend/{track_id}` | Retrieve analysis information |
+| GET | `/recommend/{track_id}` | Retrieve analysis status |
 | GET | `/recommend/{track_id}/similar` | Retrieve similar tracks |
 | POST | `/discover` | Discover songs from natural-language preferences |
+| POST | `/cyanite/webhook` | Receive Cyanite analysis notifications |
 
-## 1. Recognize Song
+## 1. Health Check
+
+**Endpoint:** `GET /health`
+
+### Purpose
+
+Confirms that the FastAPI backend is running. Useful as a first check before testing other endpoints.
+
+## 2. Recognize Song
 
 **Endpoint:** `POST /recognize`
 
@@ -45,11 +66,12 @@ Identifies a song from uploaded audio.
 ### Processing
 
 1. Receive audio.
-2. Generate fingerprints.
-3. Search the local SQLite database.
-4. Return a local match when found.
-5. Otherwise, attempt AudD recognition.
-6. Return the recognition result.
+2. Reject recordings shorter than 10 seconds with an `invalid_audio` status.
+3. Generate fingerprints.
+4. Search the local SQLite database, including altered playback speeds.
+5. Return a local match when found.
+6. Otherwise, attempt AudD recognition.
+7. Return the recognition result.
 
 ### Example Request
 
@@ -61,45 +83,53 @@ curl -X POST \
 
 The Streamlit application uploads recorded audio using multipart form data.
 
-The exact response structure should be inspected in Swagger UI.
+The exact form field name and response structure should be confirmed in Swagger UI.
 
-## 2. Submit Recommendation Audio
+## 3. Submit Recommendation Audio
 
 **Endpoint:** `POST /recommend`
 
 ### Purpose
 
-Submits audio for Cyanite similarity analysis.
+Submits audio to Cyanite for similarity analysis and returns a `track_id` used by the next two endpoints.
 
-The request and response schemas depend on the current FastAPI implementation.
-
-## 3. Retrieve Analysis
+## 4. Retrieve Analysis
 
 **Endpoint:** `GET /recommend/{track_id}`
 
 ### Purpose
 
-Retrieves information about an audio track submitted for analysis.
+Retrieves the analysis status of a track submitted to Cyanite.
 
 The `track_id` path parameter identifies the submitted track.
 
-## 4. Retrieve Similar Songs
+## 5. Retrieve Similar Songs
 
 **Endpoint:** `GET /recommend/{track_id}/similar`
 
 ### Purpose
 
-Retrieves similar-song recommendations associated with an analyzed track.
+Retrieves up to five similar-song recommendations for an analyzed track, with Spotify links when available.
 
 Recommendations depend on Cyanite availability and analysis results.
 
-## 5. Discover Music
+## 6. Cyanite Webhook
+
+**Endpoint:** `POST /cyanite/webhook`
+
+### Purpose
+
+Receives notifications from Cyanite when an analysis is finished.
+
+The Cyanite API does the analysis work, and this webhook only reports when the result is ready. If the Cyanite account has reached its plan limit, no analysis runs and the webhook is never called.
+
+## 7. Discover Music
 
 **Endpoint:** `POST /discover`
 
 ### Purpose
 
-Accepts a natural-language music preference and coordinates music discovery.
+Accepts a natural-language music preference and coordinates music discovery using Tavily and Groq.
 
 ### Example Preference
 
@@ -110,13 +140,13 @@ Telugu romantic songs featuring Nani in 2026
 ### Processing
 
 1. Receive the preference.
-2. Search for relevant information.
-3. Analyze candidate songs.
+2. Search for relevant information with Tavily.
+3. Analyze candidate songs with Groq.
 4. Verify available song metadata.
-5. Separate verified and unverified results.
-6. Return structured discovery results.
+5. Separate verified results and possible matches.
+6. Return structured discovery results, including sources when available.
 
-The exact request body should be obtained from Swagger UI.
+The exact request body should be confirmed in Swagger UI.
 
 ## HTTP Methods
 
@@ -126,7 +156,7 @@ Used when the client submits information for processing, such as audio or music 
 
 ### GET
 
-Used when the client retrieves previously created analysis results or recommendations.
+Used when the client retrieves status, analysis results, or recommendations.
 
 ## Data Formats
 
@@ -152,8 +182,7 @@ These are general HTTP meanings. Actual status codes depend on the implementatio
 
 ## API Security
 
-- Store credentials in environment variables.
-- Never hardcode API keys.
+- Store credentials in the `.env` file, never in code.
 - Exclude `.env` from Git.
 - Validate uploaded files.
 - Avoid exposing external service credentials to the frontend.
@@ -173,7 +202,7 @@ These are general HTTP meanings. Actual status codes depend on the implementatio
 
 - Standardized error responses.
 - Request size limits.
-- Automated API tests.
+- Automated API tests for each endpoint.
 - Rate limiting.
 - API versioning.
 - Authentication for deployed environments.

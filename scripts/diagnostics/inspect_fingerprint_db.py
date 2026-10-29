@@ -1,7 +1,8 @@
-
 import sqlite3
 
-connection = sqlite3.connect("fingerprints.db")
+from app.config import FINGERPRINT_DB_PATH
+
+connection = sqlite3.connect(FINGERPRINT_DB_PATH)
 cursor = connection.cursor()
 
 cursor.execute("SELECT COUNT(*) FROM fingerprints")
@@ -23,9 +24,7 @@ connection.close()
 
 
 
-import sqlite3
-
-connection = sqlite3.connect("fingerprints.db")
+connection = sqlite3.connect(FINGERPRINT_DB_PATH)
 cursor = connection.cursor()
 
 cursor.execute("""

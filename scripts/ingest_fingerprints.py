@@ -1,15 +1,14 @@
-
 from pathlib import Path
 
 import librosa
 
 from app.audio.chunker import AudioChunker
-from app.services.audio_fingerprint import AudioFingerprint
-from app.services.fingerprint_db import FingerprintDB
+from app.config import SAMPLE_RATE, SONGS_DIR
+from app.fingerprinting.fingerprinter import AudioFingerprint
+from app.fingerprinting.database import FingerprintDB
 
 
-SONGS_FOLDER = Path("data/songs")
-SAMPLE_RATE = 22050
+SONGS_FOLDER = SONGS_DIR
 
 chunker = AudioChunker(chunk_duration=8, step_size=4)
 fingerprinter = AudioFingerprint()

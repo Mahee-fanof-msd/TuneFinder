@@ -9,11 +9,22 @@ TuneFinder provides two distinct music exploration features:
 
 These features use different services and should not be confused with song identification.
 
+## Code Locations
+
+| File | Responsibility |
+|---|---|
+| `app/services/cyanite_service.py` | Cyanite audio upload, analysis, and similar-track search |
+| `app/services/tavily_service.py` | Web search for music information |
+| `app/services/groq_service.py` | Language-model candidate analysis |
+| `app/services/music_verification_service.py` | Verifies candidates and separates verified and unverified results |
+| `app/main.py` | `/recommend`, `/discover`, and `/cyanite/webhook` endpoints |
+| `frontend/streamlit_app.py` | Similar Songs and Discover screens |
+
 ## Audio-Based Recommendations
 
 TuneFinder integrates the Cyanite API for music similarity analysis.
 
-The user can submit recorded audio for analysis and request related music.
+The user selects **Similar Songs** in the Streamlit interface, submits recorded audio for analysis, and receives related music.
 
 ### Recommendation Flow
 
@@ -48,6 +59,8 @@ The application can display up to five similar-song recommendations.
 
 Spotify listening links are included when available.
 
+After the results, the user can return **Home** or continue to **Discover by Music Preferences**.
+
 ### API Operations
 
 | Method | Endpoint | Purpose |
@@ -55,17 +68,18 @@ Spotify listening links are included when available.
 | POST | `/recommend` | Submit audio |
 | GET | `/recommend/{track_id}` | Check analysis |
 | GET | `/recommend/{track_id}/similar` | Retrieve similar songs |
+| POST | `/cyanite/webhook` | Receive Cyanite analysis notifications |
 
 ### Limitations
 
 - Recommendations depend on Cyanite's catalog.
-- API access and usage limits may apply.
+- API access and usage limits may apply. When the account's plan limit is reached, recommendations stop until the limit resets, the plan is upgraded, or a new API key is configured in `.env`.
 - Audio analysis may require processing time.
 - Not every recommendation will have a Spotify link.
 
 ## Natural-Language Music Discovery
 
-The discovery feature allows users to describe the music they want.
+The discovery feature allows users to describe the music they want by selecting **Discover by Music Preferences**.
 
 Example:
 
@@ -144,18 +158,22 @@ TuneFinder separates results into two categories.
 
 Candidates that satisfy the application's verification checks.
 
-### Unverified Candidates
+### Possible Matches (Unverified Candidates)
 
-Possible matches that cannot be fully confirmed.
+Possible matches that cannot be fully confirmed. These are shown in a separate section so the user can judge them.
 
 This separation reduces the risk of presenting unsupported music recommendations as established facts.
+
+If neither verified songs nor possible matches are found, the interface asks the user to add more details to their request.
+
+### Sources
+
+When the backend returns source information, the Streamlit interface shows it in an expandable **Sources** section beneath the results.
 
 ## Example User Requests
 
 ```text
 Romantic Telugu songs from 2026
-
-Songs similar to a recorded melody
 
 Popular movie songs featuring Nani
 

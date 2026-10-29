@@ -21,7 +21,7 @@ Built using **Python, FastAPI, Streamlit, SQLite, AudD, Cyanite, Groq, and Tavil
 - ✅ **Recommendation Verification** — Separate verified songs from unverified candidates.
 - 🖥️ **Streamlit Interface** — Interactive frontend for recording, recognition, and discovery.
 - ⚡ **FastAPI Backend** — REST endpoints connecting the frontend and music services.
-- 🔄 **Microphone Reset** — Automatically reset recordings shorter than 10 seconds.
+- 🔄 **Recording Validation** — Pop-up warning and recorder reset for recordings shorter than 10 seconds.
 
 ---
 
@@ -107,7 +107,41 @@ TuneFinder separates music recognition, recommendations, and discovery into inde
        Recognition Result
 ```
 
+![TuneFinder Architecture](docs/images/architecture.png)
+
 📖 Read more: [System Architecture](docs/architecture.md)
+
+---
+
+## 📁 Project Structure
+
+```text
+TuneFinder/
+├── app/
+│   ├── main.py                  # FastAPI application and endpoints
+│   ├── config.py                # Paths, sample rate, API settings
+│   ├── api/routes/              # Health and recognition routes
+│   ├── audio/                   # Chunking, microphone, processing
+│   ├── fingerprinting/          # Fingerprinter, SQLite database, matcher
+│   └── services/                # Recognition, AudD, Cyanite, Groq, Tavily, verification
+├── frontend/
+│   └── streamlit_app.py         # Streamlit user interface
+├── scripts/
+│   ├── ingest_fingerprints.py   # Build the local fingerprint database
+│   └── diagnostics/             # Manual debugging scripts
+├── tests/                       # Pytest test suite
+├── data/
+│   ├── songs/                   # Local MP3s for ingestion (not committed)
+│   ├── test_clips/
+│   ├── recordings/
+│   └── db/                      # fingerprints.db (not committed)
+├── docs/images/                 # Architecture diagram and screenshots
+├── archive/                     # Earlier MFCC/chroma experiment
+├── requirements.txt
+├── requirements-dev.txt
+├── .env.example
+└── README.md
+```
 
 ---
 
@@ -175,10 +209,8 @@ TuneFinder requires a minimum recording duration of **10 seconds**.
 
 When a recording is shorter than 10 seconds:
 
-- ⚠️ A warning message appears.
-- ⏳ The application waits approximately 3 seconds.
-- 🏠 The interface returns to the home screen.
-- 🔄 The microphone recorder resets automatically.
+- ⚠️ A pop-up explains that at least 10 seconds are required.
+- 🔄 The microphone recorder resets so you can record again.
 
 Valid recordings proceed to song identification.
 
@@ -271,7 +303,11 @@ pip install -r requirements.txt
 
 ### 4️⃣ Configure API Credentials
 
-Create a `.env` file in the project root.
+Copy `.env.example` to `.env` in the project root:
+
+```powershell
+copy .env.example .env
+```
 
 Configure the credentials required by the enabled services:
 
@@ -284,7 +320,7 @@ Configure the credentials required by the enabled services:
 
 ### 5️⃣ Ingest Local Songs
 
-Place audio files in the configured songs directory.
+Place MP3 files in `data/songs`.
 
 Run:
 
@@ -293,6 +329,8 @@ python -m scripts.ingest_fingerprints
 ```
 
 This generates audio fingerprints and stores them in SQLite.
+
+> ⚠️ The script processes **every** MP3 in `data/songs`. When adding new songs, keep only the new files in that folder, otherwise existing songs will be fingerprinted twice.
 
 ### 6️⃣ Start FastAPI
 
@@ -313,8 +351,10 @@ http://127.0.0.1:8000/docs
 Open a separate terminal with the virtual environment activated.
 
 ```powershell
-streamlit run streamlit_app.py
+python -m streamlit run frontend/streamlit_app.py
 ```
+
+> 💡 If Windows blocks `streamlit.exe` with an Application Control policy, the `python -m streamlit` form above avoids it.
 
 🎵 Streamlit application:
 
@@ -325,6 +365,15 @@ http://localhost:8501
 ---
 
 ## 🧪 Testing
+
+### Automated Tests
+
+```powershell
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
+### Manual Testing
 
 Follow these steps to test TuneFinder:
 
@@ -354,7 +403,7 @@ Follow these steps to test TuneFinder:
 - 📚 Expand the local music catalog.
 - 🔊 Improve recognition in noisy environments.
 - ⚙️ Automate fingerprint ingestion workflows.
-- 🧪 Add automated tests and GitHub Actions CI.
+- 🧪 Expand test coverage and add GitHub Actions CI.
 - 🐳 Containerize the application using Docker.
 - ☁️ Deploy the frontend and backend.
 - 📸 Add screenshots for recommendations and AI music discovery.

@@ -1,4 +1,3 @@
-
 import time
 from datetime import datetime
 from pathlib import Path
@@ -6,6 +5,8 @@ from pathlib import Path
 import numpy as np
 import sounddevice as sd
 import soundfile as sf
+
+from app.config import RECORDINGS_DIR
 
 
 class MicrophoneRecorder:
@@ -22,7 +23,7 @@ class MicrophoneRecorder:
 
     def record(self, output_path=None):
 
-        folder = Path("data/test_clips")
+        folder = RECORDINGS_DIR
         folder.mkdir(parents=True, exist_ok=True)
 
         # Generate a unique filename for each recording

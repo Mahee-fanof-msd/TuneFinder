@@ -1,5 +1,5 @@
 
-from app.services.song_recognition_service import SongRecognitionService
+from app.services.recognition_service import SongRecognitionService
 
 # Initialize recognition service
 service = SongRecognitionService()

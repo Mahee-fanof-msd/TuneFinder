@@ -1,5 +1,5 @@
 from app.audio.chunker import AudioChunker
-from app.services.audio_fingerprint import AudioFingerprint
+from app.fingerprinting.fingerprinter import AudioFingerprint
 
 
 chunker = AudioChunker(

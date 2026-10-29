@@ -8,13 +8,32 @@ The system compares the acoustic characteristics of a microphone recording again
 
 If no suitable local match is found, the application attempts online recognition using AudD.
 
+## Code Locations
+
+| File | Responsibility |
+|---|---|
+| `app/fingerprinting/fingerprinter.py` | Spectrogram, peak detection, and fingerprint hashing |
+| `app/fingerprinting/database.py` | SQLite storage and hash lookup |
+| `app/fingerprinting/matcher.py` | Timestamp offset matching and speed detection |
+| `app/services/song_recognition_service.py` | Coordinates local matching and the AudD fallback |
+| `app/services/audd_service.py` | AudD online recognition |
+| `scripts/ingest_fingerprints.py` | Builds the local fingerprint database |
+
 ## Audio Ingestion
 
 The ingestion pipeline processes songs before they can be recognized locally.
 
+Run it from the project root:
+
+```powershell
+python -m scripts.ingest_fingerprints
+```
+
+> ⚠️ The script processes **every** MP3 in `data/songs`. When adding new songs, keep only the new files in that folder, otherwise existing songs will be fingerprinted twice.
+
 ### Step 1: Load Audio
 
-Audio files are loaded from the configured local songs directory.
+MP3 files are loaded from `data/songs`, converted to mono, and resampled to 22,050 Hz.
 
 ### Step 2: Divide Audio Into Chunks
 
@@ -37,7 +56,7 @@ Chunk 3:  8–16 seconds
 Chunk 4: 12–20 seconds
 ```
 
-Overlapping chunks improve coverage across the full song.
+Overlapping chunks improve coverage across the full song. Fingerprint timestamps are converted to full-song positions before being stored.
 
 ## Spectrogram Generation
 
@@ -87,7 +106,7 @@ Hash = H(frequency_1, frequency_2, time_difference)
 
 The fingerprint is associated with a timestamp and a song identifier.
 
-These values are stored in SQLite.
+These values are stored in SQLite at `data/db/fingerprints.db`.
 
 ## Recognition Process
 
@@ -95,7 +114,7 @@ When a user records music:
 
 1. Streamlit captures microphone audio.
 2. The recording duration is validated.
-3. FastAPI receives the audio.
+3. FastAPI receives the audio at `/recognize`.
 4. The fingerprinting service extracts acoustic fingerprints.
 5. Fingerprint hashes are searched in SQLite.
 6. Matching timestamps are compared.
@@ -118,6 +137,22 @@ Estimated recording start: 70 seconds
 Many fingerprints agreeing on the same offset provide evidence of a match.
 
 This is more reliable than comparing only the beginning of a song.
+
+## Playback Speed Detection
+
+Recordings may come from audio played faster or slower than normal.
+
+The matcher tests the following playback speeds and keeps the best alignment:
+
+| Speed |
+|---|
+| 0.50x |
+| 0.75x |
+| 1.00x |
+| 1.25x |
+| 1.50x |
+
+This allows sped-up or slowed-down versions of indexed songs to be recognised.
 
 ## Local Recognition Example
 
@@ -153,14 +188,14 @@ However, AudD recognition is not guaranteed.
 
 ## Recording Duration Validation
 
-The Streamlit application requires a recording of at least 10 seconds.
+TuneFinder requires a recording of at least 10 seconds.
 
-For shorter recordings:
+In the Streamlit application, for shorter recordings:
 
-- A warning is displayed.
-- The interface waits approximately three seconds.
-- The application returns to its home state.
-- The microphone input is reset.
+- A pop-up explains that at least 10 seconds are required.
+- The microphone recorder resets so the user can record again.
+
+The backend also rejects recordings shorter than 10 seconds and returns an `invalid_audio` status.
 
 ## Current Database
 
@@ -176,13 +211,13 @@ The SQLite database and commercial audio files are not included in the public re
 - Audio transformations may reduce fingerprint overlap.
 - Online fallback depends on AudD's recognition coverage.
 - Fingerprint thresholds affect false positives and missed matches.
+- Re-running ingestion on already indexed songs creates duplicate fingerprints.
 
 ## Future Improvements
 
 - Improve noise tolerance.
 - Expand the local catalog.
 - Benchmark recognition accuracy.
-- Add automated recognition tests.
-- Improve ingestion performance.
+- Expand automated recognition tests.
+- Improve ingestion performance and skip already indexed songs.
 - Add configurable recognition thresholds.
-    
