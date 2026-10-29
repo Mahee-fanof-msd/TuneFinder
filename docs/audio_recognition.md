@@ -29,7 +29,7 @@ Run it from the project root:
 python -m scripts.ingest_fingerprints
 ```
 
-> ⚠️ The script processes **every** MP3 in `data/songs`. When adding new songs, keep only the new files in that folder, otherwise existing songs will be fingerprinted twice.
+> ⚠ The script processes **every** MP3 in `data/songs`. When adding new songs, keep only the new files in that folder, otherwise existing songs will be fingerprinted twice.
 
 ### Step 1: Load Audio
 
@@ -56,7 +56,9 @@ Chunk 3:  8–16 seconds
 Chunk 4: 12–20 seconds
 ```
 
-Overlapping chunks improve coverage across the full song. Fingerprint timestamps are converted to full-song positions before being stored.
+Overlapping chunks improve coverage across the full song.
+
+Fingerprint timestamps are converted to full-song positions before being stored.
 
 ## Spectrogram Generation
 
@@ -65,6 +67,8 @@ The audio waveform is transformed into a time-frequency representation.
 A spectrogram describes how frequency energy changes over time.
 
 The fingerprinting implementation uses spectral analysis to identify prominent frequency peaks.
+
+![Spectrogram to fingerprint flow](images/spectrogram_fingerprint_flow.png)
 
 ## Peak Detection
 
@@ -129,8 +133,7 @@ For example:
 
 ```text
 Database fingerprint timestamp: 72 seconds
-Recording fingerprint timestamp:  2 seconds
-
+Recording fingerprint timestamp: 2 seconds
 Estimated recording start: 70 seconds
 ```
 
@@ -158,28 +161,25 @@ This allows sped-up or slowed-down versions of indexed songs to be recognised.
 
 ```text
 Microphone Recording
-         |
-         v
+        |
+        v
 Generate Fingerprints
-         |
-         v
+        |
+        v
 Search SQLite
-         |
-         v
+        |
+        v
 Find Matching Hashes
-         |
-         v
+        |
+        v
 Calculate Time Offsets
-         |
-         v
+        |
+        v
 Count Consistent Matches
-         |
-         v
+        |
+        v
 Identify Song
 ```
-
-
-![Spectrogram to fingerprint flow](images/spectrogram_fingerprint_flow.png)
 
 ## AudD Fallback
 
