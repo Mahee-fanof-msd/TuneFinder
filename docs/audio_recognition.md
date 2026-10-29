@@ -178,6 +178,9 @@ Count Consistent Matches
 Identify Song
 ```
 
+
+![Spectrogram to fingerprint flow](images/spectrogram_fingerprint_flow.png)
+
 ## AudD Fallback
 
 If the local database cannot identify the recording, TuneFinder attempts recognition using AudD.

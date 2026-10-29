@@ -23,3 +23,5 @@ data/songs/*.mp3
 .idea/
 .DS_Store
 Thumbs.db
+data/test_clips/
+data/test_clips/
